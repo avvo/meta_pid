@@ -22,13 +22,21 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
+  3. Use the provided macro to define a new MetaPid registry
+
+    ```elixir
+    defmodule MyMetaPidRegistry do
+      use MetaPid, into: SomeStruct, name: :some_server_name
+    end
+    ```
+
   3. If registering under OTP, start under a supervisor, i.e.
 
     ```elixir
     import Supervisor.Spec
 
     children = [
-      worker(MetaPid)
+      worker(MyMetaPidRegistry)
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
@@ -47,12 +55,12 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
   # 2) Register a pid with some data
 
   pid = self()
-  MetaPid.register_pid(pid, %{asdf: :fdsa})
+  MetaPid.register_pid(pid, %SomeStruct{my_key: :my_value})
 
 
   # 3) Update a pid's meta data
 
-  MetaPid.update_pid(pid, %{asdf: :new_datum})
+  MetaPid.update_pid(pid, %SomeStruct{my_key: :my_new_value})
 
 
   #4) Remove a pid from the registry
