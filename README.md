@@ -36,20 +36,26 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Example Usage
 
-i) Register a pid
+  ```elixir
+
+  # 1) Register a pid
 
   pid = self()
   MetaPid.register_pid(pid)
 
-ii) Register a pid with some data
+
+  # 2) Register a pid with some data
 
   pid = self()
   MetaPid.register_pid(pid, %{asdf: :fdsa})
 
-iii) Update a pid's meta data
+
+  # 3) Update a pid's meta data
 
   MetaPid.update_pid(pid, %{asdf: :new_datum})
 
-iv) Remove a pid from the registry
+
+  #4) Remove a pid from the registry
 
   MetaPid.unregister_pid(pid)
+  ```
