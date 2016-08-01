@@ -12,8 +12,6 @@ defmodule MetaPid do
   end
 
   def register_pid(pid, data \\ %{}) do
-    IO.inspect("registering")
-    IO.inspect(pid)
     GenServer.call(@server_name, {:register_pid, pid, data})
   end
 
@@ -26,8 +24,6 @@ defmodule MetaPid do
   end
 
   def unregister_pid(pid) do
-    IO.inspect("unregistering")
-    IO.inspect(pid)
     GenServer.call(@server_name, {:unregister_pid, pid})
   end
 
