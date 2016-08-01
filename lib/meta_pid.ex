@@ -15,12 +15,12 @@ defmodule MetaPid do
     GenServer.call(@server_name, {:register_pid, pid, data})
   end
 
-  def update_pid(pid, data) do
+  def put_pid(pid, data) do
     GenServer.call(@server_name, {:update_pid, pid, data})
   end
 
-  def get_pid(pid) do
-    GenServer.call(@server_name, {:get_pid, pid})
+  def fetch_pid(pid) do
+    GenServer.call(@server_name, {:fetch_pid, pid})
   end
 
   def unregister_pid(pid) do
@@ -49,7 +49,7 @@ defmodule MetaPid do
     {:reply, :ok, Map.delete(registry, pid)}
   end
 
-  def handle_call({:get_pid, pid}, _from, registry) do
+  def handle_call({:fetch_pid, pid}, _from, registry) do
     {:reply, Map.fetch(registry, pid), registry}
   end
 

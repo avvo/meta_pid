@@ -37,11 +37,11 @@ defmodule MetaPidTest do
   test "a pid's data can be retrieved once registered" do
     pid = new_link()
 
-    assert :error == MetaPid.get_pid(pid)
+    assert :error == MetaPid.fetch_pid(pid)
 
     MetaPid.register_pid(pid)
 
-    assert {:ok, _} = MetaPid.get_pid(pid)
+    assert {:ok, _} = MetaPid.fetch_pid(pid)
   end
 
   test "a pid can be optionally registered with data" do
@@ -51,7 +51,7 @@ defmodule MetaPidTest do
 
     MetaPid.register_pid(pid, my_data)
 
-    assert MetaPid.get_pid(pid) == {:ok, my_data}
+    assert MetaPid.fetch_pid(pid) == {:ok, my_data}
   end
 
   test "removes a pid from the registry" do
@@ -76,13 +76,13 @@ defmodule MetaPidTest do
 
     [to_change | remaining] = pids
 
-    MetaPid.update_pid(to_change, new_data)
+    MetaPid.put_pid(to_change, new_data)
 
     remaining |> Enum.each(fn (pid) ->
-      assert MetaPid.get_pid(pid) == {:ok, data}
+      assert MetaPid.fetch_pid(pid) == {:ok, data}
     end)
 
-    assert MetaPid.get_pid(to_change) == {:ok, new_data}
+    assert MetaPid.fetch_pid(to_change) == {:ok, new_data}
   end
 
   test "when a process dies, its key is removed from the registry" do
@@ -110,6 +110,6 @@ defmodule MetaPidTest do
 
     :timer.sleep(1)
 
-    assert :error == MetaPid.get_pid(pid)
+    assert :error == MetaPid.fetch_pid(pid)
   end
 end
