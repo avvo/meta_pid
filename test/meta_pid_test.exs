@@ -24,6 +24,10 @@ defmodule MetaPidTest do
     end)
   end
 
+  test "server is registered under the name specified when using the macro", %{server: pid} do
+    assert Process.whereis(:meta_pid) == pid
+  end
+
   test "stopping kills the process", %{server: pid} do
     assert Process.alive?(pid)
     MetaPidMap.stop()
@@ -50,6 +54,14 @@ defmodule MetaPidTest do
     MetaPidMap.register_pid(pid)
 
     assert {:ok, _} = MetaPidMap.fetch_pid(pid)
+  end
+
+  test "pid registered without data is initialized to an empty struct bound to the MetaPid" do
+    pid = new_link()
+
+    MetaPidMap.register_pid(pid)
+
+    assert {:ok, %MyTestStruct{}} == MetaPidMap.fetch_pid(pid)
   end
 
   test "a pid can be optionally registered with data" do
