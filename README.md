@@ -1,6 +1,6 @@
 # MetaPid
 
-**TODO: Add description**
+A simple KV store for aggregating meta data about processes.
 
 ## Installation
 
@@ -10,7 +10,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:meta_pid, "~> 0.1.0"}]
+      [{:meta_pid, git: "https://github.com/avvo/meta_pid.git", branch: "master"}]
     end
     ```
 
@@ -22,3 +22,34 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
+  3. If registering under OTP, start under a supervisor, i.e.
+
+    ```elixir
+    import Supervisor.Spec
+
+    children = [
+      worker(MetaPid)
+    ]
+
+    Supervisor.start_link(children, strategy: :one_for_one)
+    ```
+
+## Example Usage
+
+i) Register a pid
+
+  pid = self()
+  MetaPid.register_pid(pid)
+
+ii) Register a pid with some data
+
+  pid = self()
+  MetaPid.register_pid(pid, %{asdf: :fdsa})
+
+iii) Update a pid's meta data
+
+  MetaPid.update_pid(pid, %{asdf: :new_datum})
+
+iv) Remove a pid from the registry
+
+  MetaPid.unregister_pid(pid)
