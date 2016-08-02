@@ -3,8 +3,8 @@ defmodule MetaPid do
     quote bind_quoted: [ into: into, name: name ] do
       use GenServer
 
-      @type into :: into
-      @type into_map :: %{pid => into}
+      @type into :: unquote(into)
+      @type into_map :: %{pid => unquote(into)}
 
       @server_name name
 
@@ -18,12 +18,12 @@ defmodule MetaPid do
       end
 
       @spec register_pid(pid()) :: atom()
-      @spec register_pid(pid(), into) :: atom()
       def register_pid(pid) do
         data = struct(unquote(into))
-        register_pid(pid, data)
+        GenServer.call(@server_name, {:register_pid, pid, data})
       end
 
+      @spec register_pid(pid(), into()) :: atom()
       def register_pid(pid, data) do
         GenServer.call(@server_name, {:register_pid, pid, data})
       end
