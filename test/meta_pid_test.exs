@@ -3,7 +3,7 @@ defmodule MetaPidTest do
   doctest MetaPid
 
   defmodule MyTestStruct do
-    defstruct [:foo]
+    defstruct [:foo, xs: MapSet.new]
   end
 
   defmodule MetaPidSomeStruct do
@@ -103,6 +103,39 @@ defmodule MetaPidTest do
     end)
 
     assert MetaPidSomeStruct.fetch_pid(to_change) == {:ok, new_data}
+  end
+
+  test "can update an existing structure by passing a function" do
+    MetaPidSomeStruct.register_pid(self)
+    MetaPidSomeStruct.transform_pid(self, fn (existing) ->
+      %MyTestStruct{ existing | xs: MapSet.put(existing.xs, 1) }
+    end)
+
+    {:ok, actual} = MetaPidSomeStruct.fetch_pid(self)
+
+    assert actual == %MyTestStruct{xs: MapSet.new([1])}
+  end
+
+  test "can update a pid concurrently" do
+    registered = self
+
+    MetaPidSomeStruct.register_pid(registered)
+
+    tasks = Enum.map(0..10, fn (n) ->
+      Task.async(fn () ->
+        MetaPidSomeStruct.transform_pid(registered, fn (existing) ->
+          %MyTestStruct{ existing | xs: MapSet.put(existing.xs, n) }
+        end)
+      end)
+    end)
+
+    _ = tasks |> Task.yield_many()
+
+    {:ok, actual} = MetaPidSomeStruct.fetch_pid(registered)
+
+    expected = %MyTestStruct{xs: MapSet.new(Enum.map(0..10, fn (n) -> n end))}
+
+    assert actual == expected
   end
 
   test "when a process dies, its key is removed from the registry" do

@@ -8,6 +8,8 @@ defmodule MetaPid do
 
       @server_name name
 
+      # CLIENT INTERFACE
+
       @spec start_link([any()]) :: {:ok, pid()} | {:error, any()}
       def start_link(options \\ []) do
         GenServer.start_link(__MODULE__, nil, name: @server_name)
@@ -48,6 +50,13 @@ defmodule MetaPid do
         GenServer.call(@server_name, :get_registry)
       end
 
+      @spec transform_pid(pid(), (into() -> into())) :: atom()
+      def transform_pid(pid, transform_fn) do
+          GenServer.call(@server_name, {:transform_pid, pid, transform_fn})
+      end
+
+      # SERVER INTERFACE
+
       @spec init([any()]) :: {:ok, into_map()}
       def init(options \\ []) do
         {:ok, %{}}
@@ -57,6 +66,7 @@ defmodule MetaPid do
       @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, atom(), into_map()} when arg: {:unregister_pid, pid()}
       @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, :error | {:ok, into()}, map()} when arg: {:fetch_pid, pid()}
       @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, into_map(), into_map()} when arg: :get_registry
+      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, atom(), into_map()} when arg: {atom(), pid(), (into() -> into())}
 
       def handle_call({:register_pid, pid, data}, _from, registry) do
         exit_callback(pid)
@@ -77,6 +87,13 @@ defmodule MetaPid do
 
       def handle_call(:get_registry, _from, registry) do
         {:reply, registry, registry}
+      end
+
+      def handle_call({:transform_pid, pid, transform_fn}, _from, registry) do
+        case Map.fetch(registry, pid) do
+          {:ok, data} -> {:reply, :ok, Map.put(registry, pid, transform_fn.(data))}
+          _ -> {:reply, :error, registry}
+        end
       end
 
       @spec exit_callback(pid) :: pid
