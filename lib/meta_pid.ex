@@ -3,8 +3,7 @@ defmodule MetaPid do
     quote bind_quoted: [ into: into, name: name ] do
       use GenServer
 
-      @type into :: unquote(into)
-      @type into_map :: %{pid => unquote(into)}
+      @type registry :: %{pid => unquote(into).t}
 
       @server_name name
 
@@ -25,17 +24,17 @@ defmodule MetaPid do
         GenServer.call(@server_name, {:register_pid, pid, data})
       end
 
-      @spec register_pid(pid(), into()) :: atom()
+      @spec register_pid(pid(), unquote(into).t) :: atom()
       def register_pid(pid, data) do
         GenServer.call(@server_name, {:register_pid, pid, data})
       end
 
-      @spec put_pid(pid(), into()) :: atom()
+      @spec put_pid(pid(), unquote(into).t) :: atom()
       def put_pid(pid, data) do
         GenServer.call(@server_name, {:update_pid, pid, data})
       end
 
-      @spec fetch_pid(pid()) :: {:ok, into()} | :error
+      @spec fetch_pid(pid()) :: {:ok, unquote(into).t} | :error
       def fetch_pid(pid) do
         GenServer.call(@server_name, {:fetch_pid, pid})
       end
@@ -45,28 +44,28 @@ defmodule MetaPid do
         GenServer.call(@server_name, {:unregister_pid, pid})
       end
 
-      @spec get_registry() :: into_map()
+      @spec get_registry() :: registry()
       def get_registry() do
         GenServer.call(@server_name, :get_registry)
       end
 
-      @spec transform_pid(pid(), (into() -> into())) :: atom()
+      @spec transform_pid(pid(), (unquote(into).t -> unquote(into).t)) :: atom()
       def transform_pid(pid, transform_fn) do
           GenServer.call(@server_name, {:transform_pid, pid, transform_fn})
       end
 
       # SERVER INTERFACE
 
-      @spec init([any()]) :: {:ok, into_map()}
+      @spec init([any()]) :: {:ok, registry()}
       def init(options \\ []) do
         {:ok, %{}}
       end
 
-      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, atom(), into_map()} when arg: {atom(), pid(), into()}
-      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, atom(), into_map()} when arg: {:unregister_pid, pid()}
-      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, :error | {:ok, into()}, map()} when arg: {:fetch_pid, pid()}
-      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, into_map(), into_map()} when arg: :get_registry
-      @spec handle_call(arg, {pid(), any()}, into_map()) :: {:reply, atom(), into_map()} when arg: {atom(), pid(), (into() -> into())}
+      @spec handle_call(arg, {pid(), any()}, registry()) :: {:reply, atom(), registry()} when arg: {atom(), pid(), unquote(into).t}
+      @spec handle_call(arg, {pid(), any()}, registry()) :: {:reply, atom(), registry()} when arg: {:unregister_pid, pid()}
+      @spec handle_call(arg, {pid(), any()}, registry()) :: {:reply, :error | {:ok, unquote(into).t}, map()} when arg: {:fetch_pid, pid()}
+      @spec handle_call(arg, {pid(), any()}, registry()) :: {:reply, registry(), registry()} when arg: :get_registry
+      @spec handle_call(arg, {pid(), any()}, registry()) :: {:reply, atom(), registry()} when arg: {atom(), pid(), (unquote(into).t -> unquote(into).t)}
 
       def handle_call({:register_pid, pid, data}, _from, registry) do
         exit_callback(pid)
