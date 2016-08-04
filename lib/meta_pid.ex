@@ -51,7 +51,7 @@ defmodule MetaPid do
 
       @spec transform_pid(pid(), (unquote(into).t -> unquote(into).t)) :: atom()
       def transform_pid(pid, transform_fn) do
-          GenServer.call(@server_name, {:transform_pid, pid, transform_fn})
+        GenServer.call(@server_name, {:transform_pid, pid, transform_fn})
       end
 
       # SERVER INTERFACE
