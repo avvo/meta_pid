@@ -49,21 +49,21 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
   # 1) Register a pid
 
   pid = self()
-  MetaPid.register_pid(pid)
+  MyMetaPidRegistry.register_pid(pid)
 
 
   # 2) Register a pid with some data
 
   pid = self()
-  MetaPid.register_pid(pid, %SomeStruct{my_key: :my_value})
+  MyMetaPidRegistry.register_pid(pid, %SomeStruct{my_key: :my_value})
 
 
   # 3) Update a pid's meta data
 
-  MetaPid.update_pid(pid, %SomeStruct{my_key: :my_new_value})
+  MyMetaPidRegistry.update_pid(pid, %SomeStruct{my_key: :my_new_value})
 
 
   #4) Remove a pid from the registry
 
-  MetaPid.unregister_pid(pid)
+  MyMetaPidRegistry.unregister_pid(pid)
   ```
