@@ -31,7 +31,7 @@ defmodule MetaPid do
 
       @spec put_pid(pid(), unquote(into).t) :: atom()
       def put_pid(pid, data) do
-        GenServer.call(@server_name, {:update_pid, pid, data})
+        GenServer.call(@server_name, {:put_pid, pid, data})
       end
 
       @spec fetch_pid(pid()) :: {:ok, unquote(into).t} | :error
@@ -72,7 +72,7 @@ defmodule MetaPid do
         {:reply, :ok, Map.put(registry, pid, data)}
       end
 
-      def handle_call({:update_pid, pid, data}, _from, registry) do
+      def handle_call({:put_pid, pid, data}, _from, registry) do
         {:reply, :ok, Map.put(registry, pid, data)}
       end
 
