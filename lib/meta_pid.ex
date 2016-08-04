@@ -1,6 +1,36 @@
 defmodule MetaPid do
   defmacro __using__(into: into, name: name) do
     quote bind_quoted: [ into: into, name: name ] do
+      @moduledoc """
+      A simple KV store for aggregating meta data about processes.
+
+      ## Example Usage
+
+        ```elixir
+
+        # 1) Register a pid
+
+        pid = self()
+        #{__MODULE__ |> Atom.to_string}.register_pid(pid)
+
+
+        # 2) Register a pid with some data
+
+        pid = self()
+        #{__MODULE__ |> Atom.to_string}.register_pid(pid, %#{into |> Atom.to_string}{})
+
+
+        # 3) Update a pid's meta data
+
+        #{__MODULE__ |> Atom.to_string}.update_pid(pid, %#{into |> Atom.to_string}{})
+
+
+        # 4) Remove a pid from the registry
+
+        #{__MODULE__ |> Atom.to_string}.unregister_pid(pid)
+        ```
+      """
+
       use GenServer
 
       @type registry :: %{pid => unquote(into).t}
