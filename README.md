@@ -4,13 +4,13 @@ A simple KV store for aggregating meta data about processes.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+This package is available on Hex, and can be included in to your project as such:
 
   1. Add `meta_pid` to your list of dependencies in `mix.exs`:
 
     ```elixir
     def deps do
-      [{:meta_pid, git: "https://github.com/avvo/meta_pid.git", branch: "master"}]
+      [{:twilio_auth, "~> 0.1.0"}]
     end
     ```
 
