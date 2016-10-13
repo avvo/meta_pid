@@ -150,6 +150,27 @@ defmodule MetaPidTest do
     assert MetaPidSomeStruct.get_registry() == %{}
   end
 
+  test "pid is automatically unregistered if it dies as a consequence of a runtime error" do
+    test_process = self
+
+    spawn(fn () ->
+      spawn_link(fn () ->
+        send test_process, self
+        1 + "1"
+      end)
+    end)
+
+    pid = receive do
+      spawned_process -> spawned_process
+    end
+
+    MetaPidSomeStruct.register_pid(pid)
+
+    :timer.sleep(1)
+
+    assert :error == MetaPidSomeStruct.fetch_pid(pid)
+  end
+
   test "pid is automatically unregistered if its process terminates before callback is set" do
     pid = spawn(fn () ->
       receive do
