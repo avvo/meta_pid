@@ -4,14 +4,14 @@ defmodule MetaPid.Mixfile do
   def project do
     [
       app: :meta_pid,
-      version: "0.1.0",
-      elixir: "~> 1.3",
-      description: description(),
-      package: package(),
       build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
       deps: deps(),
-      dialyzer: [plt_add_deps: :transitive, plt_file: ".local.plt"]
+      description: description(),
+      dialyzer: [plt_add_deps: :transitive, plt_file: ".local.plt"],
+      elixir: "~> 1.4",
+      package: package(),
+      start_permanent: Mix.env == :prod,
+      version: "0.1.0"
     ]
   end
 
@@ -33,25 +33,14 @@ defmodule MetaPid.Mixfile do
     ]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
     [applications: [:logger]]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:dialyxir, "~> 0.3.5", only: [:dev, :test]},
+      # NON-PRODUCTION DEPS
+      {:dialyxir, "~> 0.4", only: [:dev, :test]},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
