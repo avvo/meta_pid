@@ -106,18 +106,18 @@ defmodule MetaPidTest do
   end
 
   test "can update an existing structure by passing a function" do
-    MetaPidSomeStruct.register_pid(self)
-    MetaPidSomeStruct.transform_pid(self, fn (existing) ->
-      %MyTestStruct{ existing | xs: MapSet.put(existing.xs, 1) }
+    self() |> MetaPidSomeStruct.register_pid
+    self() |> MetaPidSomeStruct.transform_pid(fn (existing) ->
+      %MyTestStruct{existing | xs: MapSet.put(existing.xs, 1)}
     end)
 
-    {:ok, actual} = MetaPidSomeStruct.fetch_pid(self)
+    {:ok, actual} = self() |> MetaPidSomeStruct.fetch_pid
 
     assert actual == %MyTestStruct{xs: MapSet.new([1])}
   end
 
   test "can update a pid concurrently" do
-    registered = self
+    registered = self()
 
     MetaPidSomeStruct.register_pid(registered)
 
@@ -151,11 +151,11 @@ defmodule MetaPidTest do
   end
 
   test "pid is automatically unregistered if it dies as a consequence of a runtime error" do
-    test_process = self
+    test_process = self()
 
     spawn(fn () ->
       spawn_link(fn () ->
-        send test_process, self
+        send(test_process, self())
         1 + "1"
       end)
     end)
