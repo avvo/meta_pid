@@ -18,12 +18,23 @@ defmodule MetaPidTest do
     %{server: pid}
   end
 
+  defmodule TestProcess do
+    use GenServer
+
+    def start_link() do
+      GenServer.start_link(__MODULE__, nil)
+    end
+
+    def handle_info({:spawn_child, from}, state) do
+      {:ok, child_pid} = start_link()
+      send from, {:child_pid, child_pid}
+      {:noreply, state}
+    end
+  end
+
   defp new_link() do
-    spawn_link(fn () ->
-      receive do
-        _ -> nil
-      end
-    end)
+    {:ok, pid} = TestProcess.start_link()
+    pid
   end
 
   test "server is registered under the name specified when using the macro", %{server: pid} do
@@ -202,5 +213,25 @@ defmodule MetaPidTest do
     :timer.sleep(1)
 
     assert :error == MetaPidSomeStruct.fetch_pid(pid)
+  end
+
+  test "a pid's ancestor's data can be retrieved" do
+    pid = new_link()
+
+    send pid, {:spawn_child, self()}
+
+    child_pid = receive do
+      {:child_pid, pid} -> pid
+    after
+      100 -> :error
+    end
+
+    assert child_pid != :error
+
+    assert :error == MetaPidSomeStruct.fetch_pid(child_pid)
+
+    MetaPidSomeStruct.register_pid(pid)
+
+    assert {:ok, _} = MetaPidSomeStruct.fetch_pid(child_pid)
   end
 end
