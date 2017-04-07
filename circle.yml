@@ -21,7 +21,6 @@ jobs:
 
       - save_cache:
           key: meta_pid-{{ .Branch }}
-          key: meta_pid-master
           paths:
             - _build
             - deps
@@ -29,3 +28,15 @@ jobs:
       - run:
           name: Run Tests
           command: mix test
+
+      - restore_cache:
+          key: meta_pid-dialyxir-{{ .Branch }}
+          key: meta_pid-dialyxir-master
+
+      - run: mix dialyzer
+
+      - save_cache:
+          key: meta_pid-dialyxir-{{ .Branch }}
+          paths:
+            - .local.plt
+            - .local.plt.hash
