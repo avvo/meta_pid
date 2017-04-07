@@ -2,6 +2,8 @@ defmodule MetaPidTest do
   use ExUnit.Case
   doctest MetaPid
 
+  import ExUnit.CaptureLog
+
   defmodule MyTestStruct do
     defstruct [:foo, xs: MapSet.new]
   end
@@ -151,24 +153,26 @@ defmodule MetaPidTest do
   end
 
   test "pid is automatically unregistered if it dies as a consequence of a runtime error" do
-    test_process = self()
+    capture_log(fn ->
+      test_process = self()
 
-    spawn(fn () ->
-      spawn_link(fn () ->
-        send(test_process, self())
-        1 + "1"
+      spawn(fn () ->
+        spawn_link(fn () ->
+          send(test_process, self())
+          raise ArithmeticError, message: "intentionally fail"
+        end)
       end)
+
+      pid = receive do
+        spawned_process -> spawned_process
+      end
+
+      MetaPidSomeStruct.register_pid(pid)
+
+      :timer.sleep(1)
+
+      assert :error == MetaPidSomeStruct.fetch_pid(pid)
     end)
-
-    pid = receive do
-      spawned_process -> spawned_process
-    end
-
-    MetaPidSomeStruct.register_pid(pid)
-
-    :timer.sleep(1)
-
-    assert :error == MetaPidSomeStruct.fetch_pid(pid)
   end
 
   test "pid is automatically unregistered if its process terminates before callback is set" do
