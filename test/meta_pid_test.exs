@@ -159,6 +159,9 @@ defmodule MetaPidTest do
       spawn(fn () ->
         spawn_link(fn () ->
           send(test_process, self())
+          receive do
+            _ -> nil
+          end
           raise ArithmeticError, message: "intentionally fail"
         end)
       end)
@@ -169,7 +172,17 @@ defmodule MetaPidTest do
 
       MetaPidSomeStruct.register_pid(pid)
 
-      :timer.sleep(1)
+      send pid, :die_now
+
+      Enum.reduce_while(1..100, 0, fn _, acc ->
+        case MetaPidSomeStruct.fetch_pid(pid) do
+          :error ->
+            {:halt, acc}
+          _ ->
+            Process.sleep(2)
+            {:cont, acc}
+        end
+      end)
 
       assert :error == MetaPidSomeStruct.fetch_pid(pid)
     end)
