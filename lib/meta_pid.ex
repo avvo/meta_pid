@@ -111,7 +111,7 @@ defmodule MetaPid do
       end
 
       def handle_call({:fetch_pid, pid}, _from, registry) do
-        {:reply, Map.fetch(registry, pid), registry}
+        {:reply, registry_fetch(registry, pid), registry}
       end
 
       def handle_call(:get_registry, _from, registry) do
@@ -134,6 +134,24 @@ defmodule MetaPid do
             {:DOWN, _, _, _, _} -> __MODULE__.unregister_pid(pid)
           end
         end)
+      end
+
+      defp registry_fetch(registry, pid) do
+        case Map.fetch(registry, pid) do
+          {:ok, _} = ok -> ok
+          :error ->
+            case get_ancestors(pid) do
+              [ancestor | _] when is_pid(ancestor) -> registry_fetch(registry, ancestor)
+              _ -> :error
+            end
+        end
+      end
+
+      defp get_ancestors(pid) do
+        case Process.info(pid, [:dictionary]) do
+          [dictionary: dictionary] -> Keyword.get(dictionary, :"$ancestors")
+          _ -> :error
+        end
       end
     end
   end
