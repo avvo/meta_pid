@@ -19,24 +19,16 @@ jobs:
 
       - run: mix do deps.get, deps.compile, compile
 
+      - run:
+          name: Run Tests
+          command: mix test
+
+      - run: mix dialyzer
+
       - save_cache:
           key: meta_pid-{{ .Branch }}
           paths:
             - _build
             - deps
-
-      - run:
-          name: Run Tests
-          command: mix test
-
-      - restore_cache:
-          key: meta_pid-dialyxir-{{ .Branch }}
-          key: meta_pid-dialyxir-master
-
-      - run: mix dialyzer
-
-      - save_cache:
-          key: meta_pid-dialyxir-{{ .Branch }}
-          paths:
             - .local.plt
             - .local.plt.hash
