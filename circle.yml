@@ -19,13 +19,16 @@ jobs:
 
       - run: mix do deps.get, deps.compile, compile
 
-      - save_cache:
-          key: meta_pid-{{ .Branch }}
-          key: meta_pid-master
-          paths:
-            - _build
-            - deps
-
       - run:
           name: Run Tests
           command: mix test
+
+      - run: mix dialyzer
+
+      - save_cache:
+          key: meta_pid-{{ .Branch }}
+          paths:
+            - _build
+            - deps
+            - .local.plt
+            - .local.plt.hash

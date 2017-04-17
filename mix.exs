@@ -7,11 +7,11 @@ defmodule MetaPid.Mixfile do
       build_embedded: Mix.env == :prod,
       deps: deps(),
       description: description(),
-      dialyzer: [plt_add_deps: :transitive, plt_file: ".local.plt"],
+      dialyzer: [plt_add_deps: :transitive],
       elixir: "~> 1.4",
       package: package(),
       start_permanent: Mix.env == :prod,
-      version: "0.1.0"
+      version: "0.2.0"
     ]
   end
 
@@ -40,8 +40,8 @@ defmodule MetaPid.Mixfile do
   defp deps do
     [
       # NON-PRODUCTION DEPS
-      {:dialyxir, "~> 0.4", only: [:dev, :test]},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:dialyxir, "~> 0.5", only: [:dev, :test]},
+      {:ex_doc, "~> 0.15", only: :dev}
     ]
   end
 end
