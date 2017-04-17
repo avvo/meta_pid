@@ -2,6 +2,8 @@ defmodule MetaPidTest do
   use ExUnit.Case
   doctest MetaPid
 
+  import ExUnit.CaptureLog
+
   defmodule MyTestStruct do
     defstruct [:foo, xs: MapSet.new]
   end
@@ -16,12 +18,23 @@ defmodule MetaPidTest do
     %{server: pid}
   end
 
+  defmodule TestProcess do
+    use GenServer
+
+    def start_link() do
+      GenServer.start_link(__MODULE__, nil)
+    end
+
+    def handle_info({:spawn_child, from}, state) do
+      {:ok, child_pid} = start_link()
+      send from, {:child_pid, child_pid}
+      {:noreply, state}
+    end
+  end
+
   defp new_link() do
-    spawn_link(fn () ->
-      receive do
-        _ -> nil
-      end
-    end)
+    {:ok, pid} = TestProcess.start_link()
+    pid
   end
 
   test "server is registered under the name specified when using the macro", %{server: pid} do
@@ -151,24 +164,39 @@ defmodule MetaPidTest do
   end
 
   test "pid is automatically unregistered if it dies as a consequence of a runtime error" do
-    test_process = self()
+    capture_log(fn ->
+      test_process = self()
 
-    spawn(fn () ->
-      spawn_link(fn () ->
-        send(test_process, self())
-        1 + "1"
+      spawn(fn () ->
+        spawn_link(fn () ->
+          send(test_process, self())
+          receive do
+            _ -> nil
+          end
+          raise ArithmeticError, message: "intentionally fail"
+        end)
       end)
+
+      pid = receive do
+        spawned_process -> spawned_process
+      end
+
+      MetaPidSomeStruct.register_pid(pid)
+
+      send pid, :die_now
+
+      Enum.reduce_while(1..100, 0, fn _, acc ->
+        case MetaPidSomeStruct.fetch_pid(pid) do
+          :error ->
+            {:halt, acc}
+          _ ->
+            Process.sleep(2)
+            {:cont, acc}
+        end
+      end)
+
+      assert :error == MetaPidSomeStruct.fetch_pid(pid)
     end)
-
-    pid = receive do
-      spawned_process -> spawned_process
-    end
-
-    MetaPidSomeStruct.register_pid(pid)
-
-    :timer.sleep(1)
-
-    assert :error == MetaPidSomeStruct.fetch_pid(pid)
   end
 
   test "pid is automatically unregistered if its process terminates before callback is set" do
@@ -185,5 +213,25 @@ defmodule MetaPidTest do
     :timer.sleep(1)
 
     assert :error == MetaPidSomeStruct.fetch_pid(pid)
+  end
+
+  test "a pid's ancestor's data can be retrieved" do
+    pid = new_link()
+
+    send pid, {:spawn_child, self()}
+
+    child_pid = receive do
+      {:child_pid, pid} -> pid
+    after
+      100 -> :error
+    end
+
+    assert child_pid != :error
+
+    assert :error == MetaPidSomeStruct.fetch_pid(child_pid)
+
+    MetaPidSomeStruct.register_pid(pid)
+
+    assert {:ok, _} = MetaPidSomeStruct.fetch_pid(child_pid)
   end
 end
