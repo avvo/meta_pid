@@ -45,7 +45,6 @@ This package is available on Hex, and can be included in to your project as such
 ## Example Usage
 
   ```elixir
-
   # 1) Register a pid
 
   pid = self()
@@ -67,3 +66,15 @@ This package is available on Hex, and can be included in to your project as such
 
   MyMetaPidRegistry.unregister_pid(pid)
   ```
+
+## Development
+
+To test:
+```
+mix test
+```
+
+To publish:
+```
+mix hex.publish
+```
